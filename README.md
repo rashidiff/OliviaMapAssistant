@@ -37,7 +37,6 @@ LangGraph pipeline
 
 ```
 OliviaMapAssistant/
-├── .env.example               # Copy to .env and fill in keys
 ├── requirements.txt
 ├── backend/
 │   ├── main.py                # FastAPI app, WebSocket handler
@@ -68,10 +67,9 @@ OliviaMapAssistant/
 ```bash
 git clone <repo-url>
 cd OliviaMapAssistant
-cp .env.example .env
 ```
 
-Edit `.env` and add your keys:
+Create a `.env` file and add your keys:
 
 ```env
 GOOGLE_MAPS_API_KEY=...
