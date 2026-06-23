@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Olivia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- ═══════════ Setup Modal (2-step) ═══════════ -->
+  <div class="setup-overlay" id="setup-overlay">
+    <div class="setup-modal">
+
+      <!-- Step 1: Address -->
+      <div class="setup-step" id="setup-step-1">
+        <div class="setup-icon">📍</div>
+        <h2 class="setup-title">Where are you?</h2>
+        <p class="setup-desc">Enter your address or a nearby landmark. This is your search origin for every query.</p>
+        <form id="address-form" autocomplete="off">
+          <input
+            type="text"
+            id="address-input"
+            class="setup-input"
+            placeholder="e.g. 1 Rue de la Station, Paris"
+            dir="ltr"
+          />
+          <button type="submit" class="setup-btn">Next →</button>
+        </form>
+      </div>
+
+      <!-- Step 2: Budget -->
+      <div class="setup-step hidden" id="setup-step-2">
+        <div class="setup-icon">💰</div>
+        <h2 class="setup-title">Budget preference?</h2>
+        <p class="setup-desc">We'll filter results to restaurants within your budget.</p>
+        <div class="budget-grid" id="budget-grid">
+          <button class="budget-opt" data-value="" data-label="Any">
+            <span class="budget-symbol">∞</span>
+            <span class="budget-name">Any price</span>
+          </button>
+          <button class="budget-opt" data-value="1" data-label="€">
+            <span class="budget-symbol">€</span>
+            <span class="budget-name">Budget</span>
+          </button>
+          <button class="budget-opt" data-value="2" data-label="€€">
+            <span class="budget-symbol">€€</span>
+            <span class="budget-name">Moderate</span>
+          </button>
+          <button class="budget-opt" data-value="3" data-label="€€€">
+            <span class="budget-symbol">€€€</span>
+            <span class="budget-name">Upscale</span>
+          </button>
+          <button class="budget-opt" data-value="4" data-label="€€€€">
+            <span class="budget-symbol">€€€€</span>
+            <span class="budget-name">Fine dining</span>
+          </button>
+        </div>
+        <button class="setup-btn" id="budget-done-btn" disabled>Save →</button>
+      </div>
+
+      <!-- Step dots -->
+      <div class="step-dots">
+        <span class="step-dot active" id="dot-1"></span>
+        <span class="step-dot" id="dot-2"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ Theme Side Panel ═══════════ -->
+  <div class="side-panel" id="side-panel">
+    <p class="side-panel-label">Theme</p>
+    <button class="theme-btn active" data-theme="dark" title="Dark mode">🌙</button>
+    <button class="theme-btn" data-theme="light" title="Light mode">☀️</button>
+  </div>
+
+  <div class="app-wrapper">
+    <div class="chat-container">
+
+      <!-- ═══════════ Header ═══════════ -->
+      <header class="app-header">
+        <div class="header-content">
+          <div class="logo-area">
+            <span class="logo-icon">🍽️</span>
+            <h1 class="app-title">Olivia</h1>
+          </div>
+          <div class="header-right">
+            <button class="settings-bar" id="settings-bar" title="Edit location & budget">
+              <span class="location-pin-icon">📍</span>
+              <span class="user-location-text" id="user-location-text">—</span>
+              <span class="header-budget" id="header-budget"></span>
+              <span class="edit-icon">✏️</span>
+            </button>
+            <div class="connection-status" title="Connection Status">
+              <span class="connection-dot" id="connection-dot"></span>
+              <span class="connection-label" id="connection-label">Connecting…</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ═══════════ Messages ═══════════ -->
+      <main class="chat-messages" id="chat-messages">
+        <div class="message bot-message welcome-card fadeInUp">
+          <div class="message-avatar">🤖</div>
+          <div class="message-bubble">
+            <p>Hello! I'm <strong>Olivia</strong> — your AI restaurant finder.</p>
+            <p class="welcome-hint">Tell me what type of restaurant you want, and optionally how far you're willing to walk.<br><br>Example: <em>"sushi, 20 min walk"</em> or <em>"iranian restaurant"</em></p>
+          </div>
+        </div>
+      </main>
+
+      <!-- ═══════════ Input ═══════════ -->
+      <footer class="input-area">
+        <div class="input-wrapper">
+          <div class="status-indicator" id="status-indicator"></div>
+          <form id="chat-form" autocomplete="off">
+            <div class="input-group">
+              <input
+                type="text"
+                id="message-input"
+                class="message-input"
+                placeholder="e.g. sushi, 20 min walk"
+                dir="ltr"
+              />
+              <button type="submit" class="send-button" id="send-button" title="Send">
+                <svg class="send-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
+            </div>
+          </form>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
