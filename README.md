@@ -140,6 +140,15 @@ Open [http://localhost:8000](http://localhost:8000).
 
 ---
 
+## License
+
+This project is licensed under the **Mandatory Attribution License**.
+Any use, modification, or distribution **requires** clear and visible credit to this repository.
+
+See [`LICENSE`](LICENSE) for the full terms — attribution is **non-negotiable and cannot be waived**.
+
+---
+
 ## Notes
 
 - **Windows compatibility** — Playwright uses the sync API inside `asyncio.to_thread()` to avoid the Windows event-loop subprocess limitation.

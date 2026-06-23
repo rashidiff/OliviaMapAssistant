@@ -1,0 +1,109 @@
+OLIVIA MAP ASSISTANT — MANDATORY ATTRIBUTION LICENSE
+Version 1.0, 2026
+
+Copyright (c) 2026 Farzad Rashidi (ffarzadrashidi@gmail.com)
+Repository: https://github.com/ffarzadrashidi/OliviaMapAssistant
+
+════════════════════════════════════════════════════════════════════
+                    MANDATORY ATTRIBUTION TERMS
+════════════════════════════════════════════════════════════════════
+
+GRANT OF LICENSE
+
+Permission is hereby granted, free of charge, to any person or
+organization obtaining a copy of this software and associated
+documentation files (the "Software"), to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of the Software,
+subject to ALL of the following conditions, which are STRICT,
+NON-NEGOTIABLE, and MANDATORY:
+
+════════════════════════════════════════════════════════════════════
+                    ATTRIBUTION REQUIREMENTS
+         (VIOLATION OF ANY ITEM TERMINATES THIS LICENSE)
+════════════════════════════════════════════════════════════════════
+
+1. SOURCE CODE ATTRIBUTION
+   Every source file, script, or notebook that is derived from or
+   incorporates any part of this Software MUST include the following
+   notice at the top of the file, verbatim and unmodified:
+
+       Based on Olivia Map Assistant by Farzad Rashidi
+       https://github.com/ffarzadrashidi/OliviaMapAssistant
+
+2. DOCUMENTATION ATTRIBUTION
+   Any README, wiki, documentation page, technical report, academic
+   paper, blog post, or written material that describes, references,
+   or is based on this Software MUST include the following credit,
+   clearly visible and not buried:
+
+       Olivia Map Assistant — Original project by Farzad Rashidi
+       Repository: https://github.com/ffarzadrashidi/OliviaMapAssistant
+
+3. USER INTERFACE ATTRIBUTION
+   Any software product, web application, desktop application, or
+   mobile application that uses, embeds, or is derived from this
+   Software and presents a user interface MUST display the following
+   notice in a permanently visible location (e.g. footer, about page,
+   credits screen):
+
+       Powered by Olivia Map Assistant
+       (https://github.com/ffarzadrashidi/OliviaMapAssistant)
+
+4. ACADEMIC AND RESEARCH USE
+   Any academic paper, thesis, dissertation, conference submission,
+   or research publication that uses this Software or its concepts
+   MUST cite it as follows:
+
+       Rashidi, F. (2026). Olivia Map Assistant [Software].
+       Retrieved from https://github.com/ffarzadrashidi/OliviaMapAssistant
+
+5. COMMERCIAL USE
+   Commercial use is permitted ONLY if all attribution requirements
+   above (items 1–4, as applicable) are fully met. No fee is required,
+   but attribution is unconditional and cannot be waived by any means,
+   including by payment or private agreement.
+
+6. DERIVATIVE WORKS AND FORKS
+   Any fork, derivative work, or project that incorporates more than
+   ten (10) lines of code from this Software MUST:
+   a) Retain this LICENSE file in full and unmodified.
+   b) Include all attribution notices listed in items 1–3 above.
+   c) Clearly state that the work is a derivative of this Software.
+
+════════════════════════════════════════════════════════════════════
+                         PROHIBITIONS
+════════════════════════════════════════════════════════════════════
+
+The following acts are STRICTLY PROHIBITED:
+
+- Removing, obscuring, or altering any attribution notice.
+- Claiming original authorship of this Software or any substantial
+  portion thereof.
+- Using the name "Olivia Map Assistant" or "Farzad Rashidi" to
+  endorse or promote derivative products without prior written
+  permission from the copyright holder.
+- Distributing this Software or any derivative under a different
+  license that weakens or removes these attribution requirements.
+
+════════════════════════════════════════════════════════════════════
+                      TERMINATION
+════════════════════════════════════════════════════════════════════
+
+Failure to comply with ANY of the above attribution requirements
+IMMEDIATELY and AUTOMATICALLY terminates the rights granted under
+this License. Upon termination, you must cease all use, distribution,
+and possession of the Software and any derivative works.
+
+════════════════════════════════════════════════════════════════════
+                      DISCLAIMER
+════════════════════════════════════════════════════════════════════
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE
+FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+════════════════════════════════════════════════════════════════════
