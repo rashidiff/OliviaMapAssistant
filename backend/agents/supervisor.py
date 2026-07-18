@@ -129,7 +129,9 @@ Always reply with valid JSON matching the expected schema.
 """
 
 _FINAL_RESPONSE_SYSTEM_PROMPT = """\
-You are a restaurant recommendation assistant. Always reply in English.
+You are a restaurant recommendation assistant.
+
+Reply in the same language as the user's query (e.g. Persian or English). If the user query is in Persian, reply in Persian. If the user query is in English, reply in English.
 
 You receive structured data from Google Maps. Use ONLY what is in this data.
 
@@ -350,12 +352,14 @@ def supervisor_exit(state: AgentState) -> dict:
     )
 
     try:
+        user_query = state.get("user_query", "")
         ai_message = llm.invoke(
             [
                 {"role": "system", "content": _FINAL_RESPONSE_SYSTEM_PROMPT},
                 {
                     "role": "user",
                     "content": (
+                        f"User query: \"{user_query}\"\n\n"
                         f"Number of results: {len(places)}\n\n"
                         f"DATA (use only this, add nothing):\n{places_summary}"
                     ),
