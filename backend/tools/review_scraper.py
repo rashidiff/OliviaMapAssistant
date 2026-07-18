@@ -14,7 +14,7 @@ import time
 from typing import Any
 
 from playwright.sync_api import sync_playwright, Page, BrowserContext
-from playwright_stealth import stealth_sync
+from playwright_stealth import Stealth
 
 from backend.config import settings
 
@@ -93,7 +93,7 @@ def _scrape_sync(google_maps_url: str, max_scrolls: int) -> list[dict[str, Any]]
                 viewport={"width": 1366, "height": 768},
             )
             page: Page = context.new_page()
-            stealth_sync(page)
+            Stealth().apply_stealth_sync(page)
 
             timeout_ms = settings.REVIEW_SCRAPE_TIMEOUT * 1000
             page.goto(google_maps_url, wait_until="domcontentloaded", timeout=timeout_ms)
