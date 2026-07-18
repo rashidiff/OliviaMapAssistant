@@ -45,6 +45,7 @@
   const MAX_DELAY      = 30000;
   let isProcessing     = false;
   let typingEl         = null;
+  const sessionId      = Math.random().toString(36).substring(2, 15);
 
   let userAddress  = '';
   let userBudget   = null;
@@ -278,6 +279,7 @@
       text,
       userAddress,
       userBudget: userBudget,   // null or integer 1–4
+      sessionId: sessionId,
     }));
     messageInput.value = '';
     setProcessing(true);

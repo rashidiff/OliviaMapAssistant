@@ -142,11 +142,16 @@ async def websocket_chat(ws: WebSocket) -> None:
                 user_budget,
             )
 
+            session_id = data.get("sessionId") or "default_session"
+            config = {"configurable": {"thread_id": session_id}}
+
             initial_state = {
                 "user_query": user_text,
                 "user_location_text": user_address,
                 "max_price_level": user_budget,
+                "error": "",
                 "status_updates": [],
+                "messages": [("user", user_text)],
             }
 
             # Track already-sent status messages to avoid duplicates
@@ -155,6 +160,7 @@ async def websocket_chat(ws: WebSocket) -> None:
             try:
                 async for event in graph.astream(
                     initial_state,
+                    config=config,
                     stream_mode="updates",
                 ):
                     # ``event`` is a dict  {node_name: node_output_dict}
@@ -218,8 +224,15 @@ async def rest_chat(request: ChatRequest) -> JSONResponse:
     logger.info("REST /api/chat: received query – %s", user_text[:80])
 
     try:
+        import uuid
+        config = {"configurable": {"thread_id": str(uuid.uuid4())}}
         result = await graph.ainvoke(
-            {"user_query": user_text, "status_updates": []}
+            {
+                "user_query": user_text,
+                "status_updates": [],
+                "messages": [("user", user_text)],
+            },
+            config=config,
         )
         final_response = result.get("final_response", {})
         return JSONResponse(content=final_response)
