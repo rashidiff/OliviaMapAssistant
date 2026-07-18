@@ -190,7 +190,9 @@ def geo_mapping_node(state: AgentState) -> dict:
         # If Directions API gave us a transit duration, prefer it over
         # Distance Matrix transit duration (which is the same data but less detail)
         transit_duration_text = transit_route.get("duration_text", "")
-        if transit_duration_text and "transit" in dist_info:
+        if transit_duration_text:
+            if "transit" not in dist_info:
+                dist_info["transit"] = {}
             dist_info["transit"]["duration_text"] = transit_duration_text
 
         place: PlaceInfo = {
