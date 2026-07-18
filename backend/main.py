@@ -2,7 +2,6 @@
 
 Endpoints:
     WS  /ws/chat   – WebSocket endpoint with streaming status updates.
-    POST /api/chat – REST fallback for non-WebSocket clients.
     GET  /         – Serves the frontend SPA (index.html).
     /*             – Static file serving from ``frontend/``.
 """
@@ -19,7 +18,6 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
 
 from backend.agents.graph import graph
 
@@ -90,11 +88,6 @@ app.add_middleware(
 )
 
 
-# ── Request / response models ──────────────────────────────────────────
-
-class ChatRequest(BaseModel):
-    """JSON body for the REST chat endpoint."""
-    text: str
 
 
 # ── WebSocket endpoint ──────────────────────────────────────────────────
@@ -206,42 +199,6 @@ async def websocket_chat(ws: WebSocket) -> None:
             pass
 
 
-# ── REST endpoint ───────────────────────────────────────────────────────
-
-@app.post("/api/chat")
-async def rest_chat(request: ChatRequest) -> JSONResponse:
-    """Run the agent graph synchronously and return the final response.
-
-    This is a simpler alternative for clients that don't support WebSockets.
-    """
-    user_text = request.text.strip()
-    if not user_text:
-        return JSONResponse(
-            status_code=400,
-            content={"error": "Please enter a query."},
-        )
-
-    logger.info("REST /api/chat: received query – %s", user_text[:80])
-
-    try:
-        import uuid
-        config = {"configurable": {"thread_id": str(uuid.uuid4())}}
-        result = await graph.ainvoke(
-            {
-                "user_query": user_text,
-                "status_updates": [],
-                "messages": [("user", user_text)],
-            },
-            config=config,
-        )
-        final_response = result.get("final_response", {})
-        return JSONResponse(content=final_response)
-    except Exception as exc:
-        logger.exception("REST /api/chat: graph execution failed")
-        return JSONResponse(
-            status_code=500,
-            content={"error": f"Server error: {exc}"},
-        )
 
 
 # ── Static file serving & SPA fallback ─────────────────────────────────
