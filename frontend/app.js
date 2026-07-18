@@ -31,7 +31,8 @@
   const headerBudget      = document.getElementById('header-budget');
 
   // ── Constants ─────────────────────────────────────────
-  const WS_URL      = 'ws://localhost:8000/ws/chat';
+  const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const WS_URL      = `${WS_PROTOCOL}//${window.location.host}/ws/chat`;
   const ADDR_KEY    = 'olivia_user_address';
   const BUDGET_KEY  = 'olivia_user_budget';
   const THEME_KEY   = 'olivia_theme';
