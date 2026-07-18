@@ -16,6 +16,7 @@ from __future__ import annotations
 import logging
 
 from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.memory import MemorySaver
 
 from backend.agents.state import AgentState
 from backend.agents.supervisor import supervisor_entry, supervisor_exit
@@ -70,7 +71,8 @@ def build_graph() -> StateGraph:
     builder.add_edge("review_analyst", "supervisor_exit")
     builder.add_edge("supervisor_exit", END)
 
-    return builder.compile()
+    memory = MemorySaver()
+    return builder.compile(checkpointer=memory)
 
 
 # ── Singleton compiled graph ────────────────────────────────────────────
