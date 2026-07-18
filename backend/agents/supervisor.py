@@ -299,26 +299,30 @@ def supervisor_exit(state: AgentState) -> dict:
 
     # ── Handle error / empty results ────────────────────────────────────
     if error:
+        err_msg = f"Unfortunately, an error occurred: {error}"
         return {
             "final_response": {
-                "chat_message": f"Unfortunately, an error occurred: {error}",
+                "chat_message": err_msg,
                 "places": [],
             },
             "status_updates": state.get("status_updates", [])
             + ["✅ Results are ready!"],
+            "messages": [("assistant", err_msg)],
         }
 
     if not places:
+        no_places_msg = (
+            "No places matching your search were found. "
+            "Please try increasing the search radius or trying a different keyword."
+        )
         return {
             "final_response": {
-                "chat_message": (
-                    "No places matching your search were found. "
-                    "Please try increasing the search radius or trying a different keyword."
-                ),
+                "chat_message": no_places_msg,
                 "places": [],
             },
             "status_updates": state.get("status_updates", [])
             + ["✅ Results are ready!"],
+            "messages": [("assistant", no_places_msg)],
         }
 
     # ── Build a textual summary for the LLM ─────────────────────────────
@@ -351,20 +355,19 @@ def supervisor_exit(state: AgentState) -> dict:
     )
 
     try:
-        user_query = state.get("user_query", "")
-        ai_message = llm.invoke(
-            [
-                {"role": "system", "content": _FINAL_RESPONSE_SYSTEM_PROMPT},
-                {
-                    "role": "user",
-                    "content": (
-                        f"User query: \"{user_query}\"\n\n"
-                        f"Number of results: {len(places)}\n\n"
-                        f"DATA (use only this, add nothing):\n{places_summary}"
-                    ),
-                },
-            ]
-        )
+        history = state.get("messages", [])
+        llm_messages = [
+            {"role": "system", "content": _FINAL_RESPONSE_SYSTEM_PROMPT}
+        ] + list(history) + [
+            {
+                "role": "user",
+                "content": (
+                    f"Number of results: {len(places)}\n\n"
+                    f"DATA (use only this data to answer the user's latest query, do not add or invent anything):\n{places_summary}"
+                ),
+            }
+        ]
+        ai_message = llm.invoke(llm_messages)
         chat_message: str = ai_message.content.strip()
     except Exception as exc:
         logger.exception("supervisor_exit: LLM response generation failed")
@@ -416,4 +419,5 @@ def supervisor_exit(state: AgentState) -> dict:
         },
         "status_updates": state.get("status_updates", [])
         + ["✅ Results are ready!"],
+        "messages": [("assistant", chat_message)],
     }
