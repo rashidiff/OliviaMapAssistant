@@ -168,7 +168,7 @@ def supervisor_entry(state: AgentState) -> dict:
         }
 
     llm = ChatOpenAI(
-        model="gpt-4.1-mini",
+        model=settings.LLM_MODEL,
         temperature=0,
         api_key=settings.OPENAI_API_KEY,
     )
@@ -344,7 +344,7 @@ def supervisor_exit(state: AgentState) -> dict:
     places_summary = "\n\n".join(summary_lines)
 
     llm = ChatOpenAI(
-        model="gpt-4.1-mini",
+        model=settings.LLM_MODEL,
         temperature=0,
         api_key=settings.OPENAI_API_KEY,
     )

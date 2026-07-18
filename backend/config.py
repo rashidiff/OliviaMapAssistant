@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     REVIEW_SCRAPE_TIMEOUT: int = 30  # seconds
 
     # ── LLM ───────────────────────────────────────────────────────────
-    LLM_MODEL: str = "gpt-4.1-mini"
+    LLM_MODEL: str = "gpt-4o-mini"
 
 
 settings = Settings()  # singleton – import this everywhere

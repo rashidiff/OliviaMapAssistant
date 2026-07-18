@@ -202,7 +202,7 @@ async def review_analyst_node(state: AgentState) -> dict:
         }
 
     llm = ChatOpenAI(
-        model="gpt-4.1-mini",
+        model=settings.LLM_MODEL,
         temperature=0,
         api_key=settings.OPENAI_API_KEY,
     )
