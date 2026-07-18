@@ -98,12 +98,13 @@ class ParsedCriteria(BaseModel):
 _PARSE_SYSTEM_PROMPT = """\
 You are a multilingual query parser for a restaurant discovery assistant.
 The user will send a natural-language query in **Persian (فارسی)** or **English**.
+You will see the conversation history ending with the user's latest message.
 
 Your job:
-1. Extract the **location** (street, landmark, neighbourhood, or address).
+1. Extract the **location** (street, landmark, neighbourhood, or address). Use the conversation history to resolve references if they mention a location previously or say "there" or "near the first place".
 2. Extract the **search criteria** – what kind of food or place the user wants \
    (e.g. pizza, kebab, café, seafood). Use a short English keyword suitable for \
-   Google Maps search.
+   Google Maps search. Resolve references using the history if the user says e.g. "pizza instead" or "closer".
 3. Extract the **radius** in metres *only* if the user explicitly mentions a \
    distance constraint (e.g. "within 500 metres", "نزدیک‌ترین در ۱ کیلومتری"). \
    Otherwise leave it as null.
@@ -114,16 +115,16 @@ Always reply with valid JSON matching the expected schema.
 _PARSE_CRITERIA_SYSTEM_PROMPT = """\
 You are a multilingual query parser for a restaurant discovery assistant.
 The user's location and budget are already set — you do NOT need to extract them.
-The user will send a natural-language query in **Persian (فارسی)** or **English**.
+You will see the conversation history ending with the user's latest message in **Persian (فارسی)** or **English**.
 
 Your job:
 1. Extract the **search criteria** – what kind of food or place the user wants \
    (e.g. pizza, kebab, café, seafood). Use a short English keyword suitable for \
-   Google Maps search.
+   Google Maps search. If the user's latest message is a follow-up (e.g. "closer", "make it cheaper", "pizza instead"), resolve references using the conversation history (e.g. keep 'sushi' as criteria if they just ask for 'closer', or change criteria to 'pizza' if they say 'pizza instead').
 2. Extract the **radius** in metres *only* if the user explicitly mentions a \
    distance constraint (e.g. "within 500 metres"). Otherwise leave it as null.
 3. Extract **max_walk_minutes** *only* if the user mentions a walking time limit \
-   (e.g. "20 min walk", "30 minutes on foot"). Otherwise leave it as null.
+   (e.g. "20 min walk", "30 minutes on foot"). If the user asks to "make it closer" or similar without specifying a number, reduce the previous walking limit or set a reasonable one (e.g. 15 minutes). Otherwise leave it as null.
 
 Always reply with valid JSON matching the expected schema.
 """
@@ -182,13 +183,12 @@ def supervisor_entry(state: AgentState) -> dict:
             pre_set_location,
         )
         structured_llm = llm.with_structured_output(ParsedCriteria)
+        history = state.get("messages", [])
+        llm_messages = [
+            {"role": "system", "content": _PARSE_CRITERIA_SYSTEM_PROMPT}
+        ] + list(history)
         try:
-            parsed_c: ParsedCriteria = structured_llm.invoke(
-                [
-                    {"role": "system", "content": _PARSE_CRITERIA_SYSTEM_PROMPT},
-                    {"role": "user", "content": user_query},
-                ]
-            )
+            parsed_c: ParsedCriteria = structured_llm.invoke(llm_messages)
         except Exception as exc:
             logger.exception("supervisor_entry: LLM criteria parsing failed")
             return {
@@ -234,13 +234,12 @@ def supervisor_entry(state: AgentState) -> dict:
 
     # ── Path B: no pre-set location — extract both from query ────────────
     structured_llm = llm.with_structured_output(ParsedQuery)
+    history = state.get("messages", [])
+    llm_messages = [
+        {"role": "system", "content": _PARSE_SYSTEM_PROMPT}
+    ] + list(history)
     try:
-        parsed: ParsedQuery = structured_llm.invoke(
-            [
-                {"role": "system", "content": _PARSE_SYSTEM_PROMPT},
-                {"role": "user", "content": user_query},
-            ]
-        )
+        parsed: ParsedQuery = structured_llm.invoke(llm_messages)
     except Exception as exc:
         logger.exception("supervisor_entry: LLM parsing failed")
         return {
