@@ -7,7 +7,8 @@ consistent contract between agents.
 
 from __future__ import annotations
 
-from typing import TypedDict, Optional
+from typing import TypedDict, Optional, Annotated
+from langgraph.graph.message import add_messages
 
 
 class PlaceInfo(TypedDict, total=False):
@@ -46,3 +47,4 @@ class AgentState(TypedDict, total=False):
     final_response: dict
     error: str
     status_updates: list[str]
+    messages: Annotated[list, add_messages]
