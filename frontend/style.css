@@ -564,6 +564,28 @@ body {
 .setup-input:focus { border-color: var(--border-focus); }
 .setup-input.input-error { border-color: var(--error); }
 
+.detect-btn {
+  width: 100%;
+  padding: 9px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.detect-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+.detect-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .setup-btn {
   width: 100%;
   padding: 11px;

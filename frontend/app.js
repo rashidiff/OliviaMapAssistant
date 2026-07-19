@@ -20,6 +20,7 @@
   const setupStep2      = document.getElementById('setup-step-2');
   const addressForm     = document.getElementById('address-form');
   const addressInput    = document.getElementById('address-input');
+  const detectLocationBtn = document.getElementById('detect-location-btn');
   const budgetGrid      = document.getElementById('budget-grid');
   const budgetDoneBtn   = document.getElementById('budget-done-btn');
   const dot1            = document.getElementById('dot-1');
@@ -159,6 +160,44 @@
     userAddress = addr;
     goToStep(2);
   });
+
+  // Detect Location button
+  if (detectLocationBtn) {
+    detectLocationBtn.addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        alert('Geolocation is not supported by your browser.');
+        return;
+      }
+      detectLocationBtn.disabled = true;
+      detectLocationBtn.textContent = '⏳ Detecting location...';
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          try {
+            const res = await fetch(`/api/geocode/reverse?lat=${latitude}&lng=${longitude}`);
+            const data = await res.json();
+            if (data.formatted_address) {
+              addressInput.value = data.formatted_address;
+            } else {
+              addressInput.value = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+            }
+          } catch {
+            addressInput.value = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+          } finally {
+            detectLocationBtn.disabled = false;
+            detectLocationBtn.textContent = '🎯 Detect My Location';
+          }
+        },
+        (error) => {
+          alert('Could not retrieve location. Please type your address manually.');
+          detectLocationBtn.disabled = false;
+          detectLocationBtn.textContent = '🎯 Detect My Location';
+        },
+        { timeout: 10000 }
+      );
+    });
+  }
 
   // Budget option click
   budgetGrid.addEventListener('click', (e) => {
