@@ -379,13 +379,28 @@
   function showTypingIndicator() {
     if (typingEl) return;
     typingEl = document.createElement('div');
-    typingEl.className = 'typing-indicator';
+    typingEl.className = 'message bot-message typing-indicator-wrapper';
     typingEl.innerHTML = `
       <div class="message-avatar">🤖</div>
-      <div class="message-bubble">
-        <span class="typing-dot"></span>
-        <span class="typing-dot"></span>
-        <span class="typing-dot"></span>
+      <div class="message-bubble" style="width: 100%;">
+        <div class="restaurant-cards-wrapper">
+          <div class="skeleton-card">
+            <div class="skeleton-line skeleton-header"></div>
+            <div class="skeleton-line skeleton-address"></div>
+            <div class="skeleton-pills">
+              <div class="skeleton-line skeleton-pill"></div>
+              <div class="skeleton-line skeleton-pill"></div>
+            </div>
+            <div class="skeleton-line skeleton-review"></div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton-line skeleton-header"></div>
+            <div class="skeleton-line skeleton-address"></div>
+            <div class="skeleton-pills">
+              <div class="skeleton-line skeleton-pill"></div>
+            </div>
+          </div>
+        </div>
       </div>`;
     chatMessages.appendChild(typingEl);
     scrollToBottom();
