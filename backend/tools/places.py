@@ -90,7 +90,9 @@ def search_nearby_places(
         # Build a natural-language query: "iranian restaurant" / "pizza" / etc.
         # Append "restaurant" only when the keyword doesn't already contain it.
         query_term = keyword.strip()
-        if "restaurant" not in query_term.lower() and "cafe" not in query_term.lower() and "bar" not in query_term.lower():
+        kw_lower = query_term.lower()
+        non_restaurant_terms = ["restaurant", "رستوران", "cafe", "کافه", "bar", "بار", "bakery", "قنادی", "coffee", "قهوه"]
+        if not any(term in kw_lower for term in non_restaurant_terms):
             query_term = f"{query_term} restaurant"
 
         logger.info(
