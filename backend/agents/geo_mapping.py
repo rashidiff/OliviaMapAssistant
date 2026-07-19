@@ -130,11 +130,29 @@ def geo_mapping_node(state: AgentState) -> dict:
             + ["❌ Error searching for places."],
         }
 
+    expanded_radius = radius
+    if not candidates:
+        expanded_radius = radius * 2
+        logger.info(
+            "geo_mapping_node: 0 candidates at %dm — auto-expanding radius to %dm",
+            radius,
+            expanded_radius,
+        )
+        try:
+            candidates = search_nearby_places(
+                lat=lat,
+                lng=lng,
+                keyword=criteria,
+                radius=expanded_radius,
+            )
+        except Exception:
+            candidates = []
+
     if not candidates:
         return {
             "user_coordinates": user_coords,
             "error": (
-                f"No places found within {radius}m "
+                f"No places found within {expanded_radius}m "
                 f"matching '{criteria}'."
             ),
             "status_updates": state.get("status_updates", [])
@@ -286,9 +304,13 @@ def geo_mapping_node(state: AgentState) -> dict:
         len(enriched_places),
     )
 
+    status_updates = list(state.get("status_updates", []))
+    if expanded_radius > radius:
+        status_updates.append(f"⚠️ Expanded search radius to {expanded_radius}m...")
+    status_updates.append("📍 Nearby places found...")
+
     return {
         "user_coordinates": user_coords,
         "shortlisted_places": shortlisted,
-        "status_updates": state.get("status_updates", [])
-        + ["📍 Nearby places found..."],
+        "status_updates": status_updates,
     }
