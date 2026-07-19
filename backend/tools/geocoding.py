@@ -73,3 +73,33 @@ def geocode_address(address: str) -> dict[str, Any]:
     except Exception as exc:  # noqa: BLE001
         logger.exception("Unexpected error during geocoding")
         return {"error": f"Unexpected error: {exc}"}
+
+
+def reverse_geocode_coordinates(lat: float, lng: float) -> dict[str, Any]:
+    """Convert latitude/longitude coordinates into a human-readable address.
+
+    Parameters
+    ----------
+    lat:
+        Latitude float.
+    lng:
+        Longitude float.
+
+    Returns
+    -------
+    dict
+        {"formatted_address": str} or {"error": str}
+    """
+    try:
+        gmaps = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
+        results = gmaps.reverse_geocode((lat, lng))
+
+        if not results:
+            return {"error": "No address found for these coordinates."}
+
+        formatted_address = results[0].get("formatted_address", f"{lat}, {lng}")
+        return {"formatted_address": formatted_address}
+    except Exception as exc:
+        logger.exception("Reverse geocoding failed for (%s, %s)", lat, lng)
+        return {"error": str(exc)}
+

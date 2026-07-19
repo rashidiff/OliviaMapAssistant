@@ -201,6 +201,18 @@ async def websocket_chat(ws: WebSocket) -> None:
 
 
 
+# ── Reverse Geocoding Endpoint ──────────────────────────────────────────
+
+@app.get("/api/geocode/reverse")
+async def api_reverse_geocode(lat: float, lng: float) -> JSONResponse:
+    """Reverse geocode latitude & longitude into a human-readable address."""
+    from backend.tools.geocoding import reverse_geocode_coordinates
+    res = reverse_geocode_coordinates(lat, lng)
+    if "error" in res:
+        return JSONResponse(status_code=400, content=res)
+    return JSONResponse(content=res)
+
+
 # ── Static file serving & SPA fallback ─────────────────────────────────
 
 @app.get("/")
