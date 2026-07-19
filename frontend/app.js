@@ -503,10 +503,20 @@
         </div>`;
     }
 
-    // Map button
-    let mapHTML = '';
+    // Map & Directions buttons
+    let actionButtonsHTML = '';
+    const buttons = [];
     if (place.google_maps_url) {
-      mapHTML = `<a class="map-button" href="${escapeAttr(place.google_maps_url)}" target="_blank" rel="noopener noreferrer">🗺️ View on Map</a>`;
+      buttons.push(`<a class="map-button" href="${escapeAttr(place.google_maps_url)}" target="_blank" rel="noopener noreferrer">🗺️ View on Map</a>`);
+    }
+    if (place.coordinates && place.coordinates.lat && place.coordinates.lng) {
+      const originParam = encodeURIComponent(userAddress || '');
+      const destParam = `${place.coordinates.lat},${place.coordinates.lng}`;
+      const dirUrl = `https://www.google.com/maps/dir/?api=1&origin=${originParam}&destination=${destParam}`;
+      buttons.push(`<a class="map-button directions-button" href="${escapeAttr(dirUrl)}" target="_blank" rel="noopener noreferrer">🧭 Get Directions</a>`);
+    }
+    if (buttons.length > 0) {
+      actionButtonsHTML = `<div class="card-actions">${buttons.join('')}</div>`;
     }
 
     card.innerHTML = `
@@ -517,7 +527,7 @@
       ${addressHTML}
       ${transportHTML}
       ${reviewHTML}
-      ${mapHTML}
+      ${actionButtonsHTML}
     `;
     return card;
   }

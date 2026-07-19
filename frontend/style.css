@@ -417,6 +417,13 @@ body {
   font-weight: 400;
 }
 
+.card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .map-button {
   display: inline-flex;
   align-items: center;
@@ -430,8 +437,19 @@ body {
   font-weight: 500;
   cursor: pointer;
   text-decoration: none;
+  transition: opacity 0.15s;
 }
 .map-button:hover { opacity: 0.85; }
+
+.directions-button {
+  background: var(--surface-alt);
+  color: var(--text-1);
+  border: 1px solid var(--border);
+}
+.directions-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
 
 /* ── Input Area ──────────────────────────────────── */
 .input-area {
