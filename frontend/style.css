@@ -501,6 +501,43 @@ body {
   background: rgba(16, 185, 129, 0.1);
 }
 
+/* ── Sort Controls ────────────────────────────────── */
+.sort-controls-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.sort-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-3);
+  margin-right: 2px;
+}
+
+.sort-opt {
+  padding: 4px 10px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.sort-opt:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.sort-opt.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 /* ── Input Area ──────────────────────────────────── */
 .input-area {
   padding: 14px 16px 18px;

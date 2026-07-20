@@ -439,6 +439,48 @@
       card.style.animationDelay = `${i * 150}ms`;
       wrapper.appendChild(card);
     });
+
+    if (places.length > 1) {
+      const sortBar = document.createElement('div');
+      sortBar.className = 'sort-controls-bar';
+      sortBar.innerHTML = `
+        <span class="sort-label">Sort:</span>
+        <button type="button" class="sort-opt active" data-sort="default">Default</button>
+        <button type="button" class="sort-opt" data-sort="rating">⭐ Rating</button>
+        <button type="button" class="sort-opt" data-sort="duration">🚶 Walk Time</button>
+      `;
+
+      sortBar.addEventListener('click', (e) => {
+        const btn = e.target.closest('.sort-opt');
+        if (!btn || btn.classList.contains('active')) return;
+
+        sortBar.querySelectorAll('.sort-opt').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const mode = btn.dataset.sort;
+        let sortedPlaces = [...places];
+
+        if (mode === 'rating') {
+          sortedPlaces.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        } else if (mode === 'duration') {
+          const getMins = (p) => {
+            const match = (p.duration_text || '').match(/(\d+)\s*min/);
+            return match ? parseInt(match[1], 10) : 999;
+          };
+          sortedPlaces.sort((a, b) => getMins(a) - getMins(b));
+        }
+
+        wrapper.innerHTML = '';
+        sortedPlaces.forEach((place, i) => {
+          const card = createRestaurantCard(place);
+          card.style.animationDelay = `${i * 100}ms`;
+          wrapper.appendChild(card);
+        });
+      });
+
+      bubble.appendChild(sortBar);
+    }
+
     bubble.appendChild(wrapper);
 
     // Share & Copy button
