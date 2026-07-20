@@ -409,6 +409,7 @@ def supervisor_exit(state: AgentState) -> dict:
                 "recent_reviews_summary": place.get("recent_reviews_summary", ""),
                 "review_source": place.get("review_source", ""),
                 "google_maps_url": place.get("google_maps_url", ""),
+                "open_now": place.get("open_now"),
             }
         )
 

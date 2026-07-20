@@ -31,6 +31,7 @@ class PlaceInfo(TypedDict, total=False):
     recent_reviews: list       # Raw scraped reviews
     recent_reviews_summary: str  # English summary produced by the LLM
     review_source: str          # Where reviews came from
+    open_now: Optional[bool]     # True=Open now, False=Closed, None=Unknown
 
 
 class AgentState(TypedDict, total=False):

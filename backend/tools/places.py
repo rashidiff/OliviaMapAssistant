@@ -147,6 +147,7 @@ def search_nearby_places(
                         "place_id",
                         "reviews",
                         "price_level",
+                        "opening_hours",
                     ],
                 )
                 detail: dict = detail_response.get("result", {})
@@ -192,6 +193,7 @@ def search_nearby_places(
                 "api_reviews": detail.get("reviews", []),
                 "price_level": price_level,
                 "price_range_text": price_range_text,
+                "open_now": detail.get("opening_hours", {}).get("open_now"),
             }
             places.append(place_entry)
 

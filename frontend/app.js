@@ -450,6 +450,14 @@
     const card = document.createElement('div');
     card.className = 'restaurant-card';
 
+    // Open Now badge
+    let openHTML = '';
+    if (place.open_now === true) {
+      openHTML = `<span class="open-badge open">🟢 Open Now</span>`;
+    } else if (place.open_now === false) {
+      openHTML = `<span class="open-badge closed">🔴 Closed</span>`;
+    }
+
     // Rating badge (no price badge)
     let ratingHTML = '';
     if (place.rating != null && place.rating > 0) {
@@ -550,7 +558,7 @@
     card.innerHTML = `
       <div class="card-header">
         <span class="restaurant-name">${escapeHTML(place.name || 'Restaurant')}</span>
-        <div class="card-badges">${ratingHTML}</div>
+        <div class="card-badges">${openHTML}${ratingHTML}</div>
       </div>
       ${addressHTML}
       ${transportHTML}
