@@ -440,6 +440,39 @@
       wrapper.appendChild(card);
     });
     bubble.appendChild(wrapper);
+
+    // Share & Copy button
+    const shareBar = document.createElement('div');
+    shareBar.className = 'share-results-bar';
+    shareBar.innerHTML = `<button type="button" class="share-btn">📋 Copy Recommendation List</button>`;
+    shareBar.querySelector('.share-btn').addEventListener('click', (e) => {
+      const btn = e.target;
+      const textSummary = places.map((p, i) => {
+        const ratingStr = p.rating ? `⭐ ${p.rating}` : '';
+        const distStr = p.duration_text || p.distance_text || '';
+        const urlStr = p.google_maps_url ? `\n   Map: ${p.google_maps_url}` : '';
+        return `${i + 1}. ${p.name} ${ratingStr}\n   ${p.address} (${distStr})${urlStr}`;
+      }).join('\n\n');
+
+      const fullShareText = `📍 Recommended Places by Olivia:\n\n${textSummary}`;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(fullShareText).then(() => {
+          btn.textContent = '✓ Copied to Clipboard!';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = '📋 Copy Recommendation List';
+            btn.classList.remove('copied');
+          }, 2500);
+        }).catch(() => {
+          alert(fullShareText);
+        });
+      } else {
+        alert(fullShareText);
+      }
+    });
+    bubble.appendChild(shareBar);
+
     container.appendChild(avatar);
     container.appendChild(bubble);
     chatMessages.appendChild(container);

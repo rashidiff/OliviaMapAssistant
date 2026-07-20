@@ -473,6 +473,34 @@ body {
   color: var(--accent);
 }
 
+.share-results-bar {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.share-btn {
+  padding: 6px 12px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-2);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.share-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+.share-btn.copied {
+  border-color: rgba(16, 185, 129, 0.4);
+  color: var(--accent);
+  background: rgba(16, 185, 129, 0.1);
+}
+
 /* ── Input Area ──────────────────────────────────── */
 .input-area {
   padding: 14px 16px 18px;
