@@ -298,6 +298,19 @@
   // ── Send ───────────────────────────────────────────────
   chatForm.addEventListener('submit', (e) => { e.preventDefault(); sendMessage(); });
 
+  const suggestionChips = document.getElementById('suggestion-chips');
+  if (suggestionChips) {
+    suggestionChips.addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      if (!chip || isProcessing) return;
+      const query = chip.dataset.query;
+      if (query) {
+        messageInput.value = query;
+        sendMessage();
+      }
+    });
+  }
+
   messageInput.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') messageInput.value = '';
   });
