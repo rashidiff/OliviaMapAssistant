@@ -76,6 +76,8 @@ GOOGLE_MAPS_API_KEY=...
 OPENAI_API_KEY=...
 ```
 
+You can copy `.env.example` as a starting point.
+
 ### 2. Enable Google Cloud APIs
 
 In [Google Cloud Console](https://console.cloud.google.com/) → **APIs & Services → Enable APIs**, enable:
@@ -137,6 +139,7 @@ Open [http://localhost:8000](http://localhost:8000).
 | `MAX_RESULTS` | | `3` | Number of restaurants returned |
 | `REVIEW_SCRAPE_TIMEOUT` | | `30` | Playwright page load timeout (seconds) |
 | `LLM_MODEL` | | `gpt-4.1-mini` | OpenAI model for summaries |
+| `CORS_ALLOWED_ORIGINS` | | `["http://localhost:8000","http://127.0.0.1:8000"]` | Allowed browser origins |
 
 ---
 

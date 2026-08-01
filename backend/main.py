@@ -20,6 +20,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from backend.agents.graph import graph
+from backend.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +82,7 @@ app = FastAPI(
 # ── CORS (permissive for local development) ─────────────────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.CORS_ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -43,12 +43,13 @@ class Settings(BaseSettings):
     DEFAULT_SEARCH_RADIUS: int = 1500  # metres
     DEFAULT_TRAVEL_MODES: list[str] = ["walking", "transit"]
     MAX_RESULTS: int = 3
+    CORS_ALLOWED_ORIGINS: list[str] = ["http://localhost:8000", "http://127.0.0.1:8000"]
 
     # ── Scraping ──────────────────────────────────────────────────────
     REVIEW_SCRAPE_TIMEOUT: int = 30  # seconds
 
     # ── LLM ───────────────────────────────────────────────────────────
-    LLM_MODEL: str = "gpt-4o-mini"
+    LLM_MODEL: str = "gpt-4.1-mini"
 
 
 settings = Settings()  # singleton – import this everywhere
