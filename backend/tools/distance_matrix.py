@@ -147,11 +147,28 @@ def calculate_distances(
         logger.warning("calculate_distances called with empty destinations list")
         return []
 
+    return [
+        dict(item)
+        for item in _calculate_distances_cached(
+            origin,
+            tuple(destinations),
+            tuple(modes),
+        )
+    ]
+
+
+@lru_cache(maxsize=512)
+def _calculate_distances_cached(
+    origin: tuple[float, float],
+    destinations: tuple[tuple[float, float], ...],
+    modes: tuple[str, ...],
+) -> tuple[dict[str, Any], ...]:
+    """Cached Distance Matrix implementation using hashable arguments."""
     try:
         gmaps = _gmaps_client()
     except Exception as exc:  # noqa: BLE001
         logger.error("Failed to initialise Google Maps client: %s", exc)
-        return [{"error": f"Client init failed: {exc}"} for _ in destinations]
+        return tuple({"error": f"Client init failed: {exc}"} for _ in destinations)
 
     # Pre-fill results: one entry per destination
     results: list[dict[str, Any]] = [{} for _ in destinations]
@@ -219,4 +236,4 @@ def calculate_distances(
                 results[idx][mode] = {"error": f"Unexpected error: {exc}"}
 
     logger.info("Distance calculations complete for %d destinations", len(destinations))
-    return results
+    return tuple(results)
