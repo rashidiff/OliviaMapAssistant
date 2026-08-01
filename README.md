@@ -157,3 +157,4 @@ See [`LICENSE`](LICENSE) for the full terms — attribution is **non-negotiable 
 - **Windows compatibility** — Playwright uses the sync API inside `asyncio.to_thread()` to avoid the Windows event-loop subprocess limitation.
 - **Review language** — the scraper and LLM handle French, Persian, and English reviews; summaries are always written in English.
 - **Price filtering** — budget is set once at setup and sent with every query; the LLM never guesses prices.
+- **Production** — see [`docs/production.md`](docs/production.md) for deployment checks, health checks, and hardening notes.

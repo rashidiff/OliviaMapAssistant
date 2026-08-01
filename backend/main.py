@@ -234,6 +234,12 @@ async def serve_index() -> FileResponse:
     return FileResponse(str(index_path))
 
 
+@app.get("/health")
+async def health() -> JSONResponse:
+    """Lightweight health check for deployment platforms."""
+    return JSONResponse(content={"status": "ok", "service": "olivia-map-assistant"})
+
+
 # Mount static files *after* explicit routes so they don't shadow them
 if FRONTEND_DIR.exists():
     app.mount(
