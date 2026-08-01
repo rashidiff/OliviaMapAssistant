@@ -18,6 +18,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from backend.agents.graph import graph
 from backend.config import settings
@@ -27,6 +28,23 @@ logger = logging.getLogger(__name__)
 # ── Paths ───────────────────────────────────────────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = PROJECT_ROOT / "frontend"
+
+
+class ChatRequest(BaseModel):
+    """Validated browser payload for the chat WebSocket."""
+
+    text: str = Field(min_length=1, max_length=500)
+    userAddress: str = Field(min_length=1, max_length=500)
+    userBudget: int | None = Field(default=None, ge=1, le=4)
+    sessionId: str = Field(default="default_session", min_length=1, max_length=80)
+
+    @field_validator("text", "userAddress", "sessionId")
+    @classmethod
+    def _strip_required_text(cls, value: str) -> str:
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError("value must not be empty")
+        return stripped
 
 
 # ── Lifespan (startup / shutdown) ──────────────────────────────────────
@@ -109,43 +127,31 @@ async def websocket_chat(ws: WebSocket) -> None:
     try:
         while True:
             raw = await ws.receive_text()
-            data: dict[str, Any] = json.loads(raw)
-            user_text: str = data.get("text", "").strip()
-            user_address: str = data.get("userAddress", "").strip()
-
-            # userBudget: null (no limit) or integer 1–4 sent from frontend
-            raw_budget = data.get("userBudget")
-            user_budget: int | None = int(raw_budget) if raw_budget is not None else None
-
-            if not user_text:
+            try:
+                data: dict[str, Any] = json.loads(raw)
+                request = ChatRequest.model_validate(data)
+            except (json.JSONDecodeError, ValidationError, ValueError) as exc:
                 await ws.send_json(
-                    {"type": "error", "message": "Please enter a query."}
-                )
-                continue
-
-            if not user_address:
-                await ws.send_json(
-                    {"type": "error", "message": "Please set your location first."}
+                    {"type": "error", "message": f"Invalid request: {exc}"}
                 )
                 continue
 
             logger.info(
                 "WebSocket: received query – %s | address – %s | budget – %s",
-                user_text[:80],
-                user_address[:80],
-                user_budget,
+                request.text[:80],
+                request.userAddress[:80],
+                request.userBudget,
             )
 
-            session_id = data.get("sessionId") or "default_session"
-            config = {"configurable": {"thread_id": session_id}}
+            config = {"configurable": {"thread_id": request.sessionId}}
 
             initial_state = {
-                "user_query": user_text,
-                "user_location_text": user_address,
-                "max_price_level": user_budget,
+                "user_query": request.text,
+                "user_location_text": request.userAddress,
+                "max_price_level": request.userBudget,
                 "error": "",
                 "status_updates": [],
-                "messages": [("user", user_text)],
+                "messages": [("user", request.text)],
             }
 
             # Track already-sent status messages to avoid duplicates
