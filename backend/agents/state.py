@@ -47,6 +47,10 @@ class AgentState(TypedDict, total=False):
     search_radius: int
     max_price_level: Optional[int]   # 1=€ 2=€€ 3=€€€ 4=€€€€, None=no constraint
     max_walk_minutes: Optional[int]  # None=no constraint
+    open_now_only: bool
+    min_rating: Optional[float]
+    require_photo: bool
+    require_price: bool
     user_coordinates: dict
     shortlisted_places: list[PlaceInfo]
     final_response: dict

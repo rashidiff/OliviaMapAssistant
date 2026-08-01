@@ -89,6 +89,22 @@ class ParsedCriteria(BaseModel):
             "(e.g. '15 min walk', '20 minutes on foot'). Return null otherwise."
         ),
     )
+    open_now_only: bool = Field(
+        default=False,
+        description="True only if the user explicitly asks for places open now/currently open.",
+    )
+    min_rating: Optional[float] = Field(
+        default=None,
+        description="Minimum rating if the user explicitly asks for highly rated/top rated places. Use 4.0 or 4.5 when appropriate.",
+    )
+    require_photo: bool = Field(
+        default=False,
+        description="True if the user asks for places with photos or wants to visually inspect places.",
+    )
+    require_price: bool = Field(
+        default=False,
+        description="True if the user asks to only show places with known price information.",
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -125,6 +141,7 @@ Your job:
    distance constraint (e.g. "within 500 metres"). Otherwise leave it as null.
 3. Extract **max_walk_minutes** *only* if the user mentions a walking time limit \
    (e.g. "20 min walk", "30 minutes on foot"). If the user asks to "make it closer" or similar without specifying a number, reduce the previous walking limit or set a reasonable one (e.g. 15 minutes). Otherwise leave it as null.
+4. Extract optional filters only when explicitly requested: open now/currently open, minimum rating/highly rated, has photos, has known price.
 
 Always reply with valid JSON matching the expected schema.
 """
@@ -228,6 +245,10 @@ def supervisor_entry(state: AgentState) -> dict:
             "search_radius": radius,
             "max_price_level": pre_set_budget,
             "max_walk_minutes": parsed_c.max_walk_minutes,
+            "open_now_only": parsed_c.open_now_only,
+            "min_rating": parsed_c.min_rating,
+            "require_photo": parsed_c.require_photo,
+            "require_price": parsed_c.require_price,
             "status_updates": state.get("status_updates", [])
             + [f"🔍 Searching near {pre_set_location}..."],
         }

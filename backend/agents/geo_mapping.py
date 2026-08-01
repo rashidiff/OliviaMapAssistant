@@ -318,7 +318,33 @@ def geo_mapping_node(state: AgentState) -> dict:
             + ["⚠️ No places matched your constraints."],
         }
 
-    # ── 8. Take top N ────────────────────────────────────────────────────
+    # ── 8. Apply optional quality/presentation filters ──────────────────
+    open_now_only = bool(state.get("open_now_only", False))
+    min_rating = state.get("min_rating")
+    require_photo = bool(state.get("require_photo", False))
+    require_price = bool(state.get("require_price", False))
+
+    if open_now_only:
+        enriched_places = [p for p in enriched_places if p.get("open_now") is True]
+    if min_rating is not None:
+        enriched_places = [p for p in enriched_places if float(p.get("rating") or 0) >= float(min_rating)]
+    if require_photo:
+        enriched_places = [p for p in enriched_places if p.get("photo_url")]
+    if require_price:
+        enriched_places = [
+            p for p in enriched_places
+            if p.get("price_level") is not None or bool(p.get("price_range_text"))
+        ]
+
+    if not enriched_places:
+        return {
+            "user_coordinates": user_coords,
+            "error": "No places found matching the requested quality filters.",
+            "status_updates": state.get("status_updates", [])
+            + ["⚠️ No places matched your filters."],
+        }
+
+    # ── 9. Take top N ────────────────────────────────────────────────────
     max_results: int = getattr(settings, "MAX_RESULTS", 3)
     shortlisted = enriched_places[:max_results]
 
