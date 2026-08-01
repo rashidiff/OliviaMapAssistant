@@ -71,6 +71,26 @@ def _walking_sort_key(place: dict) -> int:
         return 999_999
 
 
+def rank_place(place: dict) -> float:
+    """Score a place using practical restaurant-search signals."""
+    rating = float(place.get("rating") or 0)
+    total_ratings = int(place.get("total_ratings") or 0)
+    walk_seconds = _walking_sort_key(place)
+    price_known = place.get("price_level") is not None or bool(place.get("price_range_text"))
+    open_now = place.get("open_now")
+
+    score = rating * 20
+    score += min(total_ratings, 1000) / 40
+    score -= min(walk_seconds, 3600) / 120
+    if open_now is True:
+        score += 8
+    elif open_now is False:
+        score -= 6
+    if price_known:
+        score += 3
+    return score
+
+
 def geo_mapping_node(state: AgentState) -> dict:
     """Geocode → nearby search → distance matrix → top-N selection.
 
@@ -225,6 +245,10 @@ def geo_mapping_node(state: AgentState) -> dict:
             "duration_text": _format_duration(dist_info),
             "transit_lines": transit_lines,
             "google_maps_url": google_maps_url,
+            "photo_url": candidate.get("photo_url", ""),
+            "phone_number": candidate.get("phone_number", ""),
+            "website": candidate.get("website", ""),
+            "opening_hours_text": candidate.get("opening_hours_text", []),
             "price_level": candidate.get("price_level"),
             "price_range_text": candidate.get("price_range_text"),
             "api_reviews": candidate.get("api_reviews", []),
@@ -235,8 +259,8 @@ def geo_mapping_node(state: AgentState) -> dict:
 
         enriched_places.append(place)
 
-    # ── 5. Sort by walking distance ─────────────────────────────────────
-    enriched_places.sort(key=_walking_sort_key)
+    # ── 5. Sort by practical ranking score ─────────────────────────────
+    enriched_places.sort(key=rank_place, reverse=True)
 
     # ── 6. Filter by price_level if the user specified a budget ─────────
     max_price_level: int | None = state.get("max_price_level")

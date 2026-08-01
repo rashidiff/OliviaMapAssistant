@@ -7,6 +7,7 @@ distances from a single origin to multiple destinations.
 from __future__ import annotations
 
 import logging
+from functools import lru_cache
 from typing import Any
 
 import googlemaps
@@ -32,6 +33,12 @@ _VEHICLE_LABELS: dict[str, str] = {
 }
 
 
+@lru_cache(maxsize=128)
+def _gmaps_client() -> googlemaps.Client:
+    return googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
+
+
+@lru_cache(maxsize=512)
 def get_transit_route(
     origin: tuple[float, float],
     destination: tuple[float, float],
@@ -46,7 +53,7 @@ def get_transit_route(
         return {}
 
     try:
-        gmaps = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
+        gmaps = _gmaps_client()
         results = gmaps.directions(
             origin=origin,
             destination=destination,
@@ -141,7 +148,7 @@ def calculate_distances(
         return []
 
     try:
-        gmaps = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
+        gmaps = _gmaps_client()
     except Exception as exc:  # noqa: BLE001
         logger.error("Failed to initialise Google Maps client: %s", exc)
         return [{"error": f"Client init failed: {exc}"} for _ in destinations]

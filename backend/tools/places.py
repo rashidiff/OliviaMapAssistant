@@ -7,6 +7,7 @@ cuisine-type matching, followed by Place Details for enriched data.
 from __future__ import annotations
 
 import logging
+from functools import lru_cache
 from typing import Any
 
 import googlemaps
@@ -20,6 +21,12 @@ _CURRENCY_SYMBOLS = {"EUR": "€", "USD": "$", "GBP": "£", "JPY": "¥"}
 _new_places_api_enabled: bool = True  # circuit breaker
 
 
+@lru_cache(maxsize=128)
+def _gmaps_client() -> googlemaps.Client:
+    return googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
+
+
+@lru_cache(maxsize=512)
 def _fetch_price_range(place_id: str, api_key: str) -> str | None:
     """Fetch human-readable price range from the new Places API (v1).
 
@@ -68,6 +75,20 @@ def _fetch_price_range(place_id: str, api_key: str) -> str | None:
     return None
 
 
+def _photo_url(photos: list[dict], api_key: str) -> str:
+    """Build a Google Places photo URL from the first available photo reference."""
+    if not photos:
+        return ""
+    reference = photos[0].get("photo_reference")
+    if not reference:
+        return ""
+    return (
+        "https://maps.googleapis.com/maps/api/place/photo"
+        f"?maxwidth=640&photo_reference={reference}&key={api_key}"
+    )
+
+
+@lru_cache(maxsize=256)
 def search_nearby_places(
     lat: float,
     lng: float,
@@ -85,7 +106,7 @@ def search_nearby_places(
     Returns up to 5 candidates sorted by rating (descending).
     """
     try:
-        gmaps = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
+        gmaps = _gmaps_client()
 
         # Build a natural-language query: "iranian restaurant" / "pizza" / etc.
         # Append "restaurant" only when the keyword doesn't already contain it.
@@ -148,6 +169,9 @@ def search_nearby_places(
                         "reviews",
                         "price_level",
                         "opening_hours",
+                        "photos",
+                        "formatted_phone_number",
+                        "website",
                     ],
                 )
                 detail: dict = detail_response.get("result", {})
@@ -190,6 +214,10 @@ def search_nearby_places(
                 ),
                 "address": detail.get("formatted_address", result.get("vicinity", "")),
                 "google_maps_url": detail.get("url", ""),
+                "photo_url": _photo_url(detail.get("photos", result.get("photos", [])), settings.GOOGLE_MAPS_API_KEY),
+                "phone_number": detail.get("formatted_phone_number", ""),
+                "website": detail.get("website", ""),
+                "opening_hours_text": detail.get("opening_hours", {}).get("weekday_text", []),
                 "api_reviews": detail.get("reviews", []),
                 "price_level": price_level,
                 "price_range_text": price_range_text,

@@ -6,6 +6,7 @@ Uses the Google Maps Geocoding API via the ``googlemaps`` client library.
 from __future__ import annotations
 
 import logging
+from functools import lru_cache
 from typing import Any
 
 import googlemaps
@@ -15,6 +16,12 @@ from backend.config import settings
 logger = logging.getLogger(__name__)
 
 
+@lru_cache(maxsize=128)
+def _gmaps_client() -> googlemaps.Client:
+    return googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
+
+
+@lru_cache(maxsize=512)
 def geocode_address(address: str) -> dict[str, Any]:
     """Geocode a free-text address to latitude / longitude.
 
@@ -39,7 +46,7 @@ def geocode_address(address: str) -> dict[str, Any]:
         return {"error": "Address must not be empty."}
 
     try:
-        gmaps = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
+        gmaps = _gmaps_client()
         results: list[dict] = gmaps.geocode(address)
 
         if not results:
@@ -75,6 +82,7 @@ def geocode_address(address: str) -> dict[str, Any]:
         return {"error": f"Unexpected error: {exc}"}
 
 
+@lru_cache(maxsize=512)
 def reverse_geocode_coordinates(lat: float, lng: float) -> dict[str, Any]:
     """Convert latitude/longitude coordinates into a human-readable address.
 
@@ -91,7 +99,7 @@ def reverse_geocode_coordinates(lat: float, lng: float) -> dict[str, Any]:
         {"formatted_address": str} or {"error": str}
     """
     try:
-        gmaps = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
+        gmaps = _gmaps_client()
         results = gmaps.reverse_geocode((lat, lng))
 
         if not results:
@@ -102,4 +110,3 @@ def reverse_geocode_coordinates(lat: float, lng: float) -> dict[str, Any]:
     except Exception as exc:
         logger.exception("Reverse geocoding failed for (%s, %s)", lat, lng)
         return {"error": str(exc)}
-

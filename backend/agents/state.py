@@ -24,6 +24,10 @@ class PlaceInfo(TypedDict, total=False):
     duration_text: str         # e.g. "6 mins walking / 3 mins metro"
     distances: dict            # Full distance info per travel mode
     google_maps_url: str
+    photo_url: str
+    phone_number: str
+    website: str
+    opening_hours_text: list[str]
     price_level: Optional[int]      # 0=Free, 1=€, 2=€€, 3=€€€, 4=€€€€, None=unknown
     price_range_text: Optional[str] # e.g. "€10–20" from new Places API
     transit_lines: list             # e.g. [{"name":"13","vehicle":"Metro","stops":4}]
