@@ -12,6 +12,7 @@
 - Health check path: `/health`
 - Start command: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
 - Required services: Google Maps APIs, OpenAI API, outbound HTTPS access.
+- Docker: build with `docker build -t olivia-map-assistant .` and run with env vars mounted at runtime.
 
 ## Cost and latency controls
 
