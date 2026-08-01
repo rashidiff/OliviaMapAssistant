@@ -357,10 +357,11 @@
           <span class="message-time">${getCurrentTime()}</span>
         </div>`;
     } else if (type === 'bot') {
+      const direction = detectDirection(content);
       wrapper.className = 'message bot-message';
       wrapper.innerHTML = `
         <div class="message-avatar">🤖</div>
-        <div class="message-bubble">
+        <div class="message-bubble" dir="${direction}">
           <p>${formatBotText(content)}</p>
           <span class="message-time">${getCurrentTime()}</span>
         </div>`;
@@ -441,44 +442,74 @@
     });
 
     if (places.length > 1) {
-      const sortBar = document.createElement('div');
-      sortBar.className = 'sort-controls-bar';
-      sortBar.innerHTML = `
-        <span class="sort-label">Sort:</span>
-        <button type="button" class="sort-opt active" data-sort="default">Default</button>
-        <button type="button" class="sort-opt" data-sort="rating">⭐ Rating</button>
-        <button type="button" class="sort-opt" data-sort="duration">🚶 Walk Time</button>
+      const controlsBar = document.createElement('div');
+      controlsBar.className = 'result-controls-bar';
+      controlsBar.innerHTML = `
+        <div class="sort-controls-bar">
+          <span class="sort-label">Sort:</span>
+          <button type="button" class="sort-opt active" data-sort="default">Default</button>
+          <button type="button" class="sort-opt" data-sort="rating">⭐ Rating</button>
+          <button type="button" class="sort-opt" data-sort="duration">🚶 Walk Time</button>
+        </div>
+        <div class="filter-controls-bar">
+          <span class="sort-label">Filter:</span>
+          <button type="button" class="filter-opt" data-filter="open">Open now</button>
+          <button type="button" class="filter-opt" data-filter="price">Has price</button>
+          <button type="button" class="filter-opt" data-filter="photo">Has photo</button>
+        </div>
       `;
 
-      sortBar.addEventListener('click', (e) => {
-        const btn = e.target.closest('.sort-opt');
-        if (!btn || btn.classList.contains('active')) return;
+      const activeFilters = new Set();
+      let activeSort = 'default';
 
-        sortBar.querySelectorAll('.sort-opt').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+      const renderCurrent = () => {
+        let visiblePlaces = [...places];
+        if (activeFilters.has('open')) visiblePlaces = visiblePlaces.filter(p => p.open_now === true);
+        if (activeFilters.has('price')) visiblePlaces = visiblePlaces.filter(p => p.price_label);
+        if (activeFilters.has('photo')) visiblePlaces = visiblePlaces.filter(p => p.photo_url);
 
-        const mode = btn.dataset.sort;
-        let sortedPlaces = [...places];
-
-        if (mode === 'rating') {
-          sortedPlaces.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        } else if (mode === 'duration') {
-          const getMins = (p) => {
-            const match = (p.duration_text || '').match(/(\d+)\s*min/);
-            return match ? parseInt(match[1], 10) : 999;
-          };
-          sortedPlaces.sort((a, b) => getMins(a) - getMins(b));
+        if (activeSort === 'rating') {
+          visiblePlaces.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        } else if (activeSort === 'duration') {
+          visiblePlaces.sort((a, b) => getWalkMinutes(a) - getWalkMinutes(b));
         }
 
         wrapper.innerHTML = '';
-        sortedPlaces.forEach((place, i) => {
+        if (!visiblePlaces.length) {
+          const empty = document.createElement('div');
+          empty.className = 'empty-filter-state';
+          empty.textContent = 'No places match these filters.';
+          wrapper.appendChild(empty);
+          return;
+        }
+        visiblePlaces.forEach((place, i) => {
           const card = createRestaurantCard(place);
           card.style.animationDelay = `${i * 100}ms`;
           wrapper.appendChild(card);
         });
+      };
+
+      controlsBar.addEventListener('click', (e) => {
+        const sortBtn = e.target.closest('.sort-opt');
+        if (sortBtn) {
+          controlsBar.querySelectorAll('.sort-opt').forEach(b => b.classList.remove('active'));
+          sortBtn.classList.add('active');
+          activeSort = sortBtn.dataset.sort;
+          renderCurrent();
+          return;
+        }
+
+        const filterBtn = e.target.closest('.filter-opt');
+        if (filterBtn) {
+          const filter = filterBtn.dataset.filter;
+          if (activeFilters.has(filter)) activeFilters.delete(filter);
+          else activeFilters.add(filter);
+          filterBtn.classList.toggle('active');
+          renderCurrent();
+        }
       });
 
-      bubble.appendChild(sortBar);
+      bubble.appendChild(controlsBar);
     }
 
     bubble.appendChild(wrapper);
@@ -525,6 +556,12 @@
     const card = document.createElement('div');
     card.className = 'restaurant-card';
 
+    // Photo
+    let photoHTML = '';
+    if (place.photo_url) {
+      photoHTML = `<img class="restaurant-photo" src="${escapeAttr(place.photo_url)}" alt="${escapeAttr(place.name || 'Restaurant photo')}" loading="lazy">`;
+    }
+
     // Open Now badge
     let openHTML = '';
     if (place.open_now === true) {
@@ -533,7 +570,12 @@
       openHTML = `<span class="open-badge closed">🔴 Closed</span>`;
     }
 
-    // Rating badge (no price badge)
+    // Rating and price badges
+    let priceHTML = '';
+    if (place.price_label) {
+      priceHTML = `<span class="price-badge">${escapeHTML(place.price_label)}</span>`;
+    }
+
     let ratingHTML = '';
     if (place.rating != null && place.rating > 0) {
       ratingHTML = `
@@ -551,6 +593,15 @@
           <span class="card-address-icon">📍</span>
           <span>${escapeHTML(place.address)}</span>
         </div>`;
+    }
+
+    let hoursHTML = '';
+    if (Array.isArray(place.opening_hours_text) && place.opening_hours_text.length) {
+      hoursHTML = `
+        <details class="hours-details">
+          <summary>Hours</summary>
+          <ul>${place.opening_hours_text.map(line => `<li>${escapeHTML(line)}</li>`).join('')}</ul>
+        </details>`;
     }
 
     // Transport row: walking pill + transit line pills
@@ -626,18 +677,37 @@
       const dirUrl = `https://www.google.com/maps/dir/?api=1&origin=${originParam}&destination=${destParam}`;
       buttons.push(`<a class="map-button directions-button" href="${escapeAttr(dirUrl)}" target="_blank" rel="noopener noreferrer">🧭 Get Directions</a>`);
     }
+    if (place.phone_number) {
+      buttons.push(`<a class="map-button secondary-button" href="tel:${escapeAttr(place.phone_number)}">☎ Call</a>`);
+    }
+    if (place.website) {
+      buttons.push(`<a class="map-button secondary-button" href="${escapeAttr(place.website)}" target="_blank" rel="noopener noreferrer">🌐 Website</a>`);
+    }
     if (buttons.length > 0) {
       actionButtonsHTML = `<div class="card-actions">${buttons.join('')}</div>`;
     }
 
+    let mapHTML = '';
+    if (place.coordinates && place.coordinates.lat && place.coordinates.lng) {
+      const mapSrc = `https://maps.google.com/maps?q=${place.coordinates.lat},${place.coordinates.lng}&z=15&output=embed`;
+      mapHTML = `
+        <details class="map-preview">
+          <summary>Map preview</summary>
+          <iframe src="${escapeAttr(mapSrc)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </details>`;
+    }
+
     card.innerHTML = `
+      ${photoHTML}
       <div class="card-header">
         <span class="restaurant-name">${escapeHTML(place.name || 'Restaurant')}</span>
-        <div class="card-badges">${openHTML}${ratingHTML}</div>
+        <div class="card-badges">${openHTML}${priceHTML}${ratingHTML}</div>
       </div>
       ${addressHTML}
       ${transportHTML}
       ${reviewHTML}
+      ${hoursHTML}
+      ${mapHTML}
       ${actionButtonsHTML}
     `;
     return card;
@@ -663,6 +733,15 @@
 
   function getCurrentTime() {
     return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  }
+
+  function detectDirection(text) {
+    return /[\u0600-\u06FF]/.test(text || '') ? 'rtl' : 'ltr';
+  }
+
+  function getWalkMinutes(place) {
+    const match = (place.duration_text || '').match(/(\d+)\s*min/);
+    return match ? parseInt(match[1], 10) : 999;
   }
 
   function scrollToBottom() {

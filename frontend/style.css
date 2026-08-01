@@ -310,6 +310,16 @@ body {
 }
 .restaurant-card:hover { border-color: var(--border-focus); }
 
+.restaurant-photo {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
+  background: var(--surface-alt);
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -439,6 +449,40 @@ body {
   font-weight: 400;
 }
 
+.hours-details,
+.map-preview {
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+  overflow: hidden;
+}
+
+.hours-details summary,
+.map-preview summary {
+  cursor: pointer;
+  padding: 8px 10px;
+  color: var(--text-2);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.hours-details ul {
+  list-style: none;
+  padding: 0 10px 10px;
+  color: var(--text-2);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.map-preview iframe {
+  width: 100%;
+  height: 220px;
+  border: 0;
+  display: block;
+  background: var(--surface);
+}
+
 .card-actions {
   display: flex;
   gap: 8px;
@@ -467,6 +511,15 @@ body {
   background: var(--surface-alt);
   color: var(--text-1);
   border: 1px solid var(--border);
+}
+.secondary-button {
+  background: var(--surface-alt);
+  color: var(--text-1);
+  border: 1px solid var(--border);
+}
+.secondary-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 .directions-button:hover {
   border-color: var(--accent);
@@ -510,6 +563,20 @@ body {
   flex-wrap: wrap;
 }
 
+.result-controls-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.filter-controls-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .sort-label {
   font-size: 0.75rem;
   font-weight: 500;
@@ -528,14 +595,37 @@ body {
   cursor: pointer;
   transition: all 0.15s ease;
 }
-.sort-opt:hover {
+.sort-opt:hover,
+.filter-opt:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
-.sort-opt.active {
+.sort-opt.active,
+.filter-opt.active {
   background: var(--accent-dim);
   border-color: var(--accent);
   color: var(--accent);
+}
+
+.filter-opt {
+  padding: 4px 10px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.empty-filter-state {
+  padding: 14px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-2);
+  text-align: center;
+  font-size: 0.82rem;
 }
 
 /* ── Input Area ──────────────────────────────────── */
