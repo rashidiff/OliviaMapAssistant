@@ -37,6 +37,8 @@
   const ADDR_KEY    = 'olivia_user_address';
   const BUDGET_KEY  = 'olivia_user_budget';
   const THEME_KEY   = 'olivia_theme';
+  const SESSION_KEY = 'olivia_session_id';
+  const FAVORITES_KEY = 'olivia_favorites';
 
   // ── State ─────────────────────────────────────────────
   let ws               = null;
@@ -46,7 +48,7 @@
   const MAX_DELAY      = 30000;
   let isProcessing     = false;
   let typingEl         = null;
-  const sessionId      = Math.random().toString(36).substring(2, 15);
+  const sessionId      = getOrCreateSessionId();
 
   let userAddress  = '';
   let userBudget   = null;
@@ -709,7 +711,17 @@
       ${hoursHTML}
       ${mapHTML}
       ${actionButtonsHTML}
+      <button type="button" class="favorite-button" data-place-id="${escapeAttr(place.google_maps_url || place.name || '')}">
+        ${isFavorite(place) ? '★ Saved' : '☆ Save'}
+      </button>
     `;
+    const favoriteBtn = card.querySelector('.favorite-button');
+    favoriteBtn.addEventListener('click', () => {
+      toggleFavorite(place);
+      favoriteBtn.textContent = isFavorite(place) ? '★ Saved' : '☆ Save';
+      favoriteBtn.classList.toggle('saved', isFavorite(place));
+    });
+    favoriteBtn.classList.toggle('saved', isFavorite(place));
     return card;
   }
 
@@ -733,6 +745,50 @@
 
   function getCurrentTime() {
     return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  }
+
+  function getOrCreateSessionId() {
+    const existing = localStorage.getItem(SESSION_KEY);
+    if (existing) return existing;
+    const created = Math.random().toString(36).substring(2, 15);
+    localStorage.setItem(SESSION_KEY, created);
+    return created;
+  }
+
+  function loadFavorites() {
+    try {
+      return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  function favoriteKey(place) {
+    return place.google_maps_url || `${place.name}|${place.address}`;
+  }
+
+  function isFavorite(place) {
+    const key = favoriteKey(place);
+    return loadFavorites().some(item => item.key === key);
+  }
+
+  function toggleFavorite(place) {
+    const key = favoriteKey(place);
+    const favorites = loadFavorites();
+    const existingIndex = favorites.findIndex(item => item.key === key);
+    if (existingIndex >= 0) {
+      favorites.splice(existingIndex, 1);
+    } else {
+      favorites.push({
+        key,
+        name: place.name || '',
+        address: place.address || '',
+        url: place.google_maps_url || '',
+        rating: place.rating || null,
+        savedAt: new Date().toISOString(),
+      });
+    }
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
   }
 
   function detectDirection(text) {

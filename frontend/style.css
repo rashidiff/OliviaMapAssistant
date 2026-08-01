@@ -488,6 +488,7 @@ body {
   gap: 8px;
   flex-wrap: wrap;
   align-items: center;
+  margin-bottom: 10px;
 }
 
 .map-button {
@@ -520,6 +521,24 @@ body {
 .secondary-button:hover {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+.favorite-button {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-2);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.favorite-button:hover,
+.favorite-button.saved {
+  border-color: var(--amber);
+  color: var(--amber);
 }
 .directions-button:hover {
   border-color: var(--accent);
