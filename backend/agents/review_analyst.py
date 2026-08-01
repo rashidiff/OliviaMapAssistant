@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 _REVIEW_ANALYSIS_SYSTEM_PROMPT = """\
 You are a restaurant review analyst. Reviews may be in any language \
-(French, Persian, English, etc.) — read them all and write your summary in English.
+(French, Persian, English, etc.) — read them all and write your summary in the same language as the user's search query.
 
 STRICT RULES:
 - Only report what is explicitly written in the review texts provided.
