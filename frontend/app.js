@@ -560,8 +560,9 @@
 
     // Photo
     let photoHTML = '';
-    if (place.photo_url) {
-      photoHTML = `<img class="restaurant-photo" src="${escapeAttr(place.photo_url)}" alt="${escapeAttr(place.name || 'Restaurant photo')}" loading="lazy">`;
+    const photoUrl = safeExternalUrl(place.photo_url);
+    if (photoUrl) {
+      photoHTML = `<img class="restaurant-photo" src="${escapeAttr(photoUrl)}" alt="${escapeAttr(place.name || 'Restaurant photo')}" loading="lazy">`;
     }
 
     // Open Now badge
@@ -679,8 +680,9 @@
     // Map & Directions buttons
     let actionButtonsHTML = '';
     const buttons = [];
-    if (place.google_maps_url) {
-      buttons.push(`<a class="map-button" href="${escapeAttr(place.google_maps_url)}" target="_blank" rel="noopener noreferrer">🗺️ View on Map</a>`);
+    const mapUrl = safeExternalUrl(place.google_maps_url);
+    if (mapUrl) {
+      buttons.push(`<a class="map-button" href="${escapeAttr(mapUrl)}" target="_blank" rel="noopener noreferrer">🗺️ View on Map</a>`);
     }
     if (place.coordinates && place.coordinates.lat && place.coordinates.lng) {
       const originParam = encodeURIComponent(userAddress || '');
@@ -691,8 +693,9 @@
     if (place.phone_number) {
       buttons.push(`<a class="map-button secondary-button" href="tel:${escapeAttr(place.phone_number)}">☎ Call</a>`);
     }
-    if (place.website) {
-      buttons.push(`<a class="map-button secondary-button" href="${escapeAttr(place.website)}" target="_blank" rel="noopener noreferrer">🌐 Website</a>`);
+    const websiteUrl = safeExternalUrl(place.website);
+    if (websiteUrl) {
+      buttons.push(`<a class="map-button secondary-button" href="${escapeAttr(websiteUrl)}" target="_blank" rel="noopener noreferrer">🌐 Website</a>`);
     }
     if (buttons.length > 0) {
       actionButtonsHTML = `<div class="card-actions">${buttons.join('')}</div>`;
@@ -751,6 +754,17 @@
   function escapeAttr(str) {
     return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function safeExternalUrl(value) {
+    if (!value || typeof value !== 'string') return '';
+    try {
+      const url = new URL(value, window.location.origin);
+      if (url.protocol === 'http:' || url.protocol === 'https:') return url.href;
+    } catch {
+      return '';
+    }
+    return '';
   }
 
   function getCurrentTime() {
