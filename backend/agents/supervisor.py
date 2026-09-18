@@ -164,6 +164,37 @@ Reply with plain text only.
 """
 
 
+def build_recommendation_reason(place: dict) -> str:
+    """Create a short, factual reason for ranking a place."""
+    reasons: list[str] = []
+
+    rating = place.get("rating")
+    total_ratings = place.get("total_ratings")
+    if rating and float(rating) >= 4.5:
+        rating_text = f"{rating:g}"
+        if total_ratings:
+            reasons.append(f"{rating_text} rating from {total_ratings} reviews")
+        else:
+            reasons.append(f"{rating_text} rating")
+
+    duration_text = place.get("duration_text")
+    if duration_text and duration_text != "N/A":
+        reasons.append(duration_text)
+
+    if place.get("open_now") is True:
+        reasons.append("open now")
+
+    price_level = place.get("price_level")
+    price_range_text = place.get("price_range_text")
+    if price_level is not None:
+        _PRICE_SYMBOLS = {0: "Free", 1: "€", 2: "€€", 3: "€€€", 4: "€€€€"}
+        reasons.append(f"price {_PRICE_SYMBOLS.get(price_level, price_level)}")
+    elif price_range_text:
+        reasons.append(f"price {price_range_text}")
+
+    return " · ".join(reasons[:3])
+
+
 # ---------------------------------------------------------------------------
 # Node functions
 # ---------------------------------------------------------------------------
@@ -435,6 +466,7 @@ def supervisor_exit(state: AgentState) -> dict:
                 "review_source": place.get("review_source", ""),
                 "google_maps_url": place.get("google_maps_url", ""),
                 "open_now": place.get("open_now"),
+                "recommendation_reason": build_recommendation_reason(place),
             }
         )
 

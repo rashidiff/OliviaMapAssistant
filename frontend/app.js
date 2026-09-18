@@ -597,6 +597,15 @@
         </div>`;
     }
 
+    let reasonHTML = '';
+    if (place.recommendation_reason) {
+      reasonHTML = `
+        <div class="recommendation-reason">
+          <span class="recommendation-reason-label">Why this fits</span>
+          ${escapeHTML(place.recommendation_reason)}
+        </div>`;
+    }
+
     let hoursHTML = '';
     if (Array.isArray(place.opening_hours_text) && place.opening_hours_text.length) {
       hoursHTML = `
@@ -706,6 +715,7 @@
         <div class="card-badges">${openHTML}${priceHTML}${ratingHTML}</div>
       </div>
       ${addressHTML}
+      ${reasonHTML}
       ${transportHTML}
       ${reviewHTML}
       ${hoursHTML}
