@@ -23,7 +23,6 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
-from backend.agents.graph import graph
 from backend.config import settings
 
 logger = logging.getLogger(__name__)
@@ -33,6 +32,17 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = PROJECT_ROOT / "frontend"
 SESSION_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{1,80}$")
 _rate_limit_buckets: dict[str, deque[float]] = defaultdict(deque)
+_graph = None
+
+
+def get_graph():
+    """Lazily import the LangGraph app so lightweight imports stay fast."""
+    global _graph
+    if _graph is None:
+        from backend.agents.graph import graph
+
+        _graph = graph
+    return _graph
 
 
 class ChatRequest(BaseModel):
@@ -202,7 +212,7 @@ async def websocket_chat(ws: WebSocket) -> None:
             sent_statuses: set[str] = set()
 
             try:
-                async for event in graph.astream(
+                async for event in get_graph().astream(
                     initial_state,
                     config=config,
                     stream_mode="updates",
