@@ -14,6 +14,8 @@ Conditional edge:
 from __future__ import annotations
 
 import logging
+import sqlite3
+from pathlib import Path
 
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
@@ -22,8 +24,43 @@ from backend.agents.state import AgentState
 from backend.agents.supervisor import supervisor_entry, supervisor_exit
 from backend.agents.geo_mapping import geo_mapping_node
 from backend.agents.review_analyst import review_analyst_node
+from backend.config import settings
 
 logger = logging.getLogger(__name__)
+_sqlite_connection: sqlite3.Connection | None = None
+
+
+def _build_checkpointer():
+    """Build the configured LangGraph checkpointer.
+
+    SQLite keeps chat state across process restarts. If the optional package is
+    unavailable, fall back to in-memory state so local development still works.
+    """
+    global _sqlite_connection
+
+    checkpoint_path = settings.CHECKPOINT_DB_PATH.strip()
+    if not checkpoint_path:
+        logger.warning("CHECKPOINT_DB_PATH is empty; using in-memory checkpoints")
+        return MemorySaver()
+
+    try:
+        from langgraph.checkpoint.sqlite import SqliteSaver
+    except ImportError:
+        logger.warning(
+            "langgraph-checkpoint-sqlite is not installed; using in-memory checkpoints"
+        )
+        return MemorySaver()
+
+    db_path = Path(checkpoint_path)
+    if not db_path.is_absolute():
+        db_path = Path(__file__).resolve().parents[2] / db_path
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+
+    _sqlite_connection = sqlite3.connect(str(db_path), check_same_thread=False)
+    checkpointer = SqliteSaver(_sqlite_connection)
+    checkpointer.setup()
+    logger.info("Using SQLite LangGraph checkpoint store at %s", db_path)
+    return checkpointer
 
 
 def _route_after_geo(state: AgentState) -> str:
@@ -71,8 +108,7 @@ def build_graph() -> StateGraph:
     builder.add_edge("review_analyst", "supervisor_exit")
     builder.add_edge("supervisor_exit", END)
 
-    memory = MemorySaver()
-    return builder.compile(checkpointer=memory)
+    return builder.compile(checkpointer=_build_checkpointer())
 
 
 # ── Singleton compiled graph ────────────────────────────────────────────

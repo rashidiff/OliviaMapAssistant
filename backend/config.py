@@ -53,5 +53,8 @@ class Settings(BaseSettings):
     # ── LLM ───────────────────────────────────────────────────────────
     LLM_MODEL: str = "gpt-4.1-mini"
 
+    # ── State persistence ─────────────────────────────────────────────
+    CHECKPOINT_DB_PATH: str = "data/checkpoints.sqlite"
+
 
 settings = Settings()  # singleton – import this everywhere
