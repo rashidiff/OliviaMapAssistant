@@ -208,11 +208,15 @@ async def review_analyst_node(state: AgentState) -> dict:
         api_key=settings.OPENAI_API_KEY,
     )
 
-    # Run all analyse tasks concurrently
-    tasks = [
-        _analyse_single_place(place, llm, user_query)
-        for place in places
-    ]
+    concurrency = max(1, settings.REVIEW_ANALYSIS_CONCURRENCY)
+    semaphore = asyncio.Semaphore(concurrency)
+
+    async def _bounded_analyse(place: dict) -> dict:
+        async with semaphore:
+            return await _analyse_single_place(place, llm, user_query)
+
+    # Run analyses concurrently, but cap fan-out to protect API quotas.
+    tasks = [_bounded_analyse(place) for place in places]
     updated_places: list[dict] = await asyncio.gather(*tasks)
 
     logger.info(

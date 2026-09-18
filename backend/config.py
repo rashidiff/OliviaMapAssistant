@@ -49,6 +49,7 @@ class Settings(BaseSettings):
 
     # ── Scraping ──────────────────────────────────────────────────────
     REVIEW_SCRAPE_TIMEOUT: int = 30  # seconds
+    REVIEW_ANALYSIS_CONCURRENCY: int = 3
 
     # ── LLM ───────────────────────────────────────────────────────────
     LLM_MODEL: str = "gpt-4.1-mini"
