@@ -10,6 +10,9 @@ from __future__ import annotations
 
 import json
 import logging
+import re
+import time
+from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
@@ -28,6 +31,8 @@ logger = logging.getLogger(__name__)
 # ── Paths ───────────────────────────────────────────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = PROJECT_ROOT / "frontend"
+SESSION_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{1,80}$")
+_rate_limit_buckets: dict[str, deque[float]] = defaultdict(deque)
 
 
 class ChatRequest(BaseModel):
@@ -45,6 +50,36 @@ class ChatRequest(BaseModel):
         if not stripped:
             raise ValueError("value must not be empty")
         return stripped
+
+    @field_validator("sessionId")
+    @classmethod
+    def _validate_session_id(cls, value: str) -> str:
+        if not SESSION_ID_PATTERN.fullmatch(value):
+            raise ValueError(
+                "sessionId may contain only letters, numbers, underscores, and hyphens"
+            )
+        return value
+
+
+def _rate_limit_key(ws: WebSocket, session_id: str) -> str:
+    client_host = ws.client.host if ws.client else "unknown"
+    return f"{client_host}:{session_id}"
+
+
+def _is_rate_limited(key: str) -> bool:
+    now = time.monotonic()
+    window = settings.WS_RATE_LIMIT_WINDOW_SECONDS
+    limit = settings.WS_RATE_LIMIT_MESSAGES
+    bucket = _rate_limit_buckets[key]
+
+    while bucket and now - bucket[0] > window:
+        bucket.popleft()
+
+    if len(bucket) >= limit:
+        return True
+
+    bucket.append(now)
+    return False
 
 
 # ── Lifespan (startup / shutdown) ──────────────────────────────────────
@@ -142,6 +177,15 @@ async def websocket_chat(ws: WebSocket) -> None:
                 request.userAddress[:80],
                 request.userBudget,
             )
+
+            if _is_rate_limited(_rate_limit_key(ws, request.sessionId)):
+                await ws.send_json(
+                    {
+                        "type": "error",
+                        "message": "Too many requests. Please wait a moment and try again.",
+                    }
+                )
+                continue
 
             config = {"configurable": {"thread_id": request.sessionId}}
 

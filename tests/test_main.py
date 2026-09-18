@@ -30,3 +30,14 @@ def test_chat_request_rejects_invalid_budget() -> None:
                 "userBudget": 9,
             }
         )
+
+
+def test_chat_request_rejects_invalid_session_id() -> None:
+    with pytest.raises(ValidationError):
+        ChatRequest.model_validate(
+            {
+                "text": "sushi",
+                "userAddress": "Paris",
+                "sessionId": "../../bad",
+            }
+        )
