@@ -43,6 +43,8 @@ class Settings(BaseSettings):
     DEFAULT_SEARCH_RADIUS: int = 1500  # metres
     DEFAULT_TRAVEL_MODES: list[str] = ["walking", "transit"]
     MAX_RESULTS: int = 3
+    GOOGLE_MAPS_TIMEOUT_SECONDS: int = 5
+    GOOGLE_MAPS_RETRY_TIMEOUT_SECONDS: int = 10
     CORS_ALLOWED_ORIGINS: list[str] = ["http://localhost:8000", "http://127.0.0.1:8000"]
     WS_RATE_LIMIT_MESSAGES: int = 10
     WS_RATE_LIMIT_WINDOW_SECONDS: int = 60

@@ -23,7 +23,11 @@ _new_places_api_enabled: bool = True  # circuit breaker
 
 @lru_cache(maxsize=128)
 def _gmaps_client() -> googlemaps.Client:
-    return googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
+    return googlemaps.Client(
+        key=settings.GOOGLE_MAPS_API_KEY,
+        timeout=settings.GOOGLE_MAPS_TIMEOUT_SECONDS,
+        retry_timeout=settings.GOOGLE_MAPS_RETRY_TIMEOUT_SECONDS,
+    )
 
 
 @lru_cache(maxsize=512)
