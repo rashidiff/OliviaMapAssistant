@@ -12,6 +12,7 @@ jobs:
   backend:
     runs-on: ubuntu-latest
     env:
+      PYTHONPATH: .
       GOOGLE_MAPS_API_KEY: ci-google-placeholder
       OPENAI_API_KEY: ci-openai-placeholder
       CORS_ALLOWED_ORIGINS: '["http://localhost:8000"]'
@@ -29,4 +30,4 @@ jobs:
       - name: Compile backend sources
         run: python -m compileall -q backend tests
       - name: Run tests
-        run: pytest -q
+        run: python -m pytest -q
